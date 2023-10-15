@@ -1,0 +1,48 @@
+#include <stdio.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+int main() {
+    int fd_write, fd_read;
+
+    // FIFO file paths
+    char *fifo_send = "/tmp/fifo_send";
+    char *fifo_receive = "/tmp/fifo_receive";
+
+    // Creating the named pipes (FIFO)
+    mkfifo(fifo_send, 0666);
+    mkfifo(fifo_receive, 0666);
+
+    char sentence[100];
+
+    while (1) {
+        // Open FIFO for writing
+        fd_write = open(fifo_send, O_WRONLY);
+
+        // Take an input sentence from the user
+        printf("Enter a sentence (or 'exit' to quit): ");
+        fgets(sentence, sizeof(sentence), stdin);
+
+        // Write the input sentence on the send FIFO
+        write(fd_write, sentence, strlen(sentence) + 1);
+        close(fd_write);
+
+        if (strcmp(sentence, "exit\n") == 0) {
+            break;
+        }
+
+        // Open FIFO for reading
+        fd_read = open(fifo_receive, O_RDONLY);
+
+        // Read and display the result sent by the second process
+        char result[100];
+        read(fd_read, result, sizeof(result));
+        printf("Received from Process 2: %s\n", result);
+        close(fd_read);
+    }
+
+    return 0;
+}

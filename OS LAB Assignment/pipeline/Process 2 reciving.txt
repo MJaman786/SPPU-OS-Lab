@@ -1,0 +1,55 @@
+#include <stdio.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+int main() {
+    int fd_write, fd_read;
+
+    // FIFO file paths
+    char *fifo_send = "/tmp/fifo_send";
+    char *fifo_receive = "/tmp/fifo_receive";
+
+    // Creating the named pipes (FIFO)
+    mkfifo(fifo_send, 0666);
+    mkfifo(fifo_receive, 0666);
+
+    while (1) {
+        // Open FIFO for reading
+        fd_read = open(fifo_send, O_RDONLY);
+
+        // Read the sentence sent by the first process
+        char sentence[100];
+        read(fd_read, sentence, sizeof(sentence));
+        close(fd_read);
+
+        if (strcmp(sentence, "exit\n") == 0) {
+            break;
+        }
+
+        // Process the sentence (count characters, words, and lines)
+        int charCount = 0, wordCount = 0, lineCount = 0;
+        for (int i = 0; sentence[i] != '\0'; i++) {
+            charCount++;
+            if (sentence[i] == ' ' || sentence[i] == '\n') {
+                wordCount++;
+            }
+            if (sentence[i] == '\n') {
+                lineCount++;
+            }
+        }
+
+        // Open FIFO for writing
+        fd_write = open(fifo_receive, O_WRONLY);
+
+        // Write the result to the receive FIFO
+        char result[100];
+        sprintf(result, "Characters: %d, Words: %d, Lines: %d", charCount, wordCount, lineCount);
+        write(fd_write, result, strlen(result) + 1);
+        close(fd_write);
+    }
+
+    return 0;
+}
