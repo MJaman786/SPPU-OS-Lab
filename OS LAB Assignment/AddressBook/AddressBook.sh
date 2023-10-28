@@ -1,178 +1,288 @@
 #!/bin/sh
 
-create() {
-    echo ""
-    read -p "-> Enter name for address book : " abname
-    result=$(ls | grep "$abname" | wc -w)
-    if [ $result -gt 0 ]; then
-        echo "-> Book already exists"
-    else
-        touch "$abname"
-        echo "-> Book created with the name '$abname'"
-    fi
+create(){
+	read -p "Enter name of the book : " ab
+	res=$(ls | grep $ab | wc -w)
+	if [ $res -gt 0 ]; then
+		echo "Book already exixt"
+	else
+		touch $ab.txt
+		echo "Book name '$ab' created"
+	fi	
 }
 
-insert() {
-    echo ""
-    read -p "Enter name of the book : " abname
-    result=$(ls | grep "$abname" | wc -w)
-    if [ $result -gt 0 ]; then
-        echo "-> Book found"
-        read -p "Enter phone number : " phone
-        res=$(cat "$abname" | grep "$phone" | wc -w)
-        if [ $res -gt 0 ]; then
-            echo "-> ERROR: Record already exists"
-        else
-            echo "Enter information : "
-            read -p "1. Enter full name : " name
-            read -p "2. Enter email : " email
-            read -p "3. Enter phone number : " number
-            echo "Full Name: $name | Email: $email | Phone Number: $number" >> "$abname"
-        fi
-    else
-        echo "-> Book not found"
-    fi
-}
-
-modify() {
-    echo ""
-    read -p "Enter name of the book: " abname
-    result=$(ls | grep "$abname" | wc -w)
-    
-    if [ $result -gt 0 ]; then
-        echo "-> Book found"
-        read -p "Enter the phone number of the contact you want to modify: " phone
-        res=$(cat "$abname" | grep "$phone" | wc -w)
-        
-        if [ $res -gt 0 ]; then
-            echo "Enter new information for the contact:"
-            read -p "1. Enter full name: " new_name
-            read -p "2. Enter email: " new_email
-            read -p "3. Enter phone number: " new_number
-            
-            # Use sed to modify the contact information in the address book
-            sed -i "/$phone/c $new_name | $new_email | $new_number" "$abname"
-            echo "Contact modified successfully."
-        else
-            echo "-> ERROR: Contact not found in the address book"
-        fi
-    else
-        echo "-> Book not found"
-    fi
-}
-
-display() {
-    echo ""
-    read -p "Enter the book name : " abname
-    result=$(ls | grep "$abname" | wc -w)
-    if [ $result -gt 0 ]; then
-        echo "-> Book found"
-        cat "$abname"
-    else
-        echo "-> Book not found"
-    fi
-}
-
-while true; do
-    echo "----------- MENU ------------"
-    echo "1. Create"
-    echo "2. Insert"
-    echo "3. Modify"
-    echo "4. Display"
-    echo "5. Exit"
-    echo ""
-    read -p "Enter your choice : " choice
-
-    case $choice in
-        1) create ;;
-        2) insert ;;
-        3) modify ;;
-        4) display ;;
-        5) exit ;;
-        *) echo "Invalid option" ;;
-    esac
-done
-
-<<COMMENT
-	#output:
+insert(){
+	echo ""
+	read -p "Enter the name of book : " ab
+	res=$(ls | grep $ab | wc -w)
+	if [ $res -gt 0 ]; then
+		echo " Book have found "
+		read -p "-> Enter name    = " name
+		read -p "-> Enter gmail   = " gmail
+		read -p "-> Enter address = " address
+		echo "" >> $ab
+		echo "[Name = '$name' | Gmail = '$gmail' | Address = '$address']" >> $ab
+		echo "Contact has added in book..."
+	else
+		echo "Book not found"
+	fi
 	
-aman@aman-Latitude-E5470:~$ ./a.sh
+}
+
+modify(){
+	read -p "Enter name of book : " ab;
+	res=$(ls | grep $ab | wc -w)
+	if [ $res -gt 0 ]; then
+		echo "Book found"
+	
+		read -p "Enter gmail for modification : " gmail
+		res1=$(cat $ab | grep $gmail | wc -w)
+		if [ $res1 -gt 0 ]; then
+			echo "Enter new information"
+			read -p "1. Enter name : " new_name
+			read -p "2. Gmail      : " new_gmail
+			read -p "3. Address    : " new_address
+			
+			sed -i "/$gmail/c [Name = '$new_name' | gmail = '$new_gmail' | address = '$new_address']" $ab
+		else
+			echo "profile not found"
+		fi
+	else
+		echo "Book not found"
+	fi
+}
+
+delete(){
+
+	echo ""
+	read -p "Enter name of the book : " ab
+	res=$(ls | grep $ab | wc -w)
+	if [ $res -gt 0 ]; then
+		echo "Book found"
+		read -p "Enter gmail for deleting contac : " dgmail
+		res2=$(cat $ab | grep $dgmail | wc -w)
+		if [ $res2 -gt 0 ]; then
+			echo ""
+			sed -i "/$dgmail/d" "$ab"
+			echo "Contac is deleted"
+		else
+			echo "Contac not found"
+		fi		
+	else
+		echo "Book not found"
+	fi
+}
+
+display(){
+	echo ""
+	read -p "Enter name of the book : " ab
+	res=$(ls | grep $ab | wc -w) 
+	if [ $res -gt 0 ]; then
+		echo "Book found"
+		echo "Content in file : "
+		cat $ab
+	else
+		echo "Book Not found"
+	fi
+}
+
+while [ true ]
+do
+	echo ""
+	echo "----------- MENU ------------"
+	echo "1. Create"
+	echo "2. Insert"
+	echo "3. Modify"
+	echo "4. Delete"
+	echo "5. Display"
+	echo "6. Exit"
+	echo " "
+	read -p "Enter your choice : " choice
+	
+	case $choice in
+		1) create ;;
+		2) insert ;; 
+		3) modify ;;
+		4) delete ;;
+		5) display ;;
+		6) exit ;;
+		
+		*) echo "Enter valid option";;
+		
+	esac
+		
+done
+	 
+<<COMMENTS
+aman@aman-Latitude-E5470:~$ ./aman.sh
+
 ----------- MENU ------------
 1. Create
 2. Insert
 3. Modify
-4. Display
-5. Exit
-
+4. Delete
+5. Display
+6. Exit
+ 
 Enter your choice : 1
+Enter name of the book : ABCD
+Book name 'ABCD' created
 
--> Enter name for address book : ABCD
--> Book created with the name 'ABCD'
 ----------- MENU ------------
 1. Create
 2. Insert
 3. Modify
-4. Display
-5. Exit
-
+4. Delete
+5. Display
+6. Exit
+ 
 Enter your choice : 2
 
-Enter name of the book : ABCD
--> Book found
-Enter phone number : 123
-Enter information : 
-1. Enter full name : Aman Munir Mujawar
-2. Enter email : aman@gmail.com
-3. Enter phone number : 123456
+Enter the name of book : ABCD
+ Book have found 
+-> Enter name    = aman
+-> Enter gmail   = aman@gmail.com
+-> Enter address = pune
+Contact has added in book...
+
 ----------- MENU ------------
 1. Create
 2. Insert
 3. Modify
-4. Display
-5. Exit
+4. Delete
+5. Display
+6. Exit
+ 
+Enter your choice : 2
 
-Enter your choice : 4
+Enter the name of book : aditya
+Book not found
 
-Enter the book name : ABCD
--> Book found
-Full Name: Aman Munir Mujawar | Email: aman@gmail.com | Phone Number: 123456
 ----------- MENU ------------
 1. Create
 2. Insert
 3. Modify
-4. Display
-5. Exit
+4. Delete
+5. Display
+6. Exit
+ 
+Enter your choice : 2
 
-Enter your choice : 3
+Enter the name of book : ABCD
+ Book have found 
+-> Enter name    = aditya
+-> Enter gmail   = aditya@gmail.com
+-> Enter address = pimpri
+Contact has added in book...
 
-Enter name of the book: ABCD
--> Book found
-Enter the phone number of the contact you want to modify: 123456
-Enter new information for the contact:
-1. Enter full name: Ayan Munir Mujawar
-2. Enter email: ayan@gmail.com
-3. Enter phone number: 123123
-Contact modified successfully.
 ----------- MENU ------------
 1. Create
 2. Insert
 3. Modify
-4. Display
-5. Exit
-
-Enter your choice : 4
-
-Enter the book name : ABCD
--> Book found
-Ayan Munir Mujawar | ayan@gmail.com | 123123
------------ MENU ------------
-1. Create
-2. Insert
-3. Modify
-4. Display
-5. Exit
-
+4. Delete
+5. Display
+6. Exit
+ 
 Enter your choice : 5
-aman@aman-Latitude-E5470:~$ 
 
-COMMENT
+Enter name of the book : ABCD
+Book found
+Content in file : 
+
+[Name = 'aman' | Gmail = 'aman@gmail.com' | Address = 'pune']
+
+[Name = 'aditya' | Gmail = 'aditya@gmail.com' | Address = 'pimpri']
+
+----------- MENU ------------
+1. Create
+2. Insert
+3. Modify
+4. Delete
+5. Display
+6. Exit
+ 
+Enter your choice : 3
+Enter name of book : ABCD
+Book found
+Enter gmail for modification : aman@gmail.com
+Enter new information
+1. Enter name : ayan
+2. Gmail      : ayan@gmail.com
+3. Address    : pune
+
+----------- MENU ------------
+1. Create
+2. Insert
+3. Modify
+4. Delete
+5. Display
+6. Exit
+ 
+Enter your choice : 5
+
+Enter name of the book : ABCD
+Book found
+Content in file : 
+
+[Name = 'ayan' | gmail = 'ayan@gmail.com' | address = 'pune']
+
+[Name = 'aditya' | Gmail = 'aditya@gmail.com' | Address = 'pimpri']
+
+----------- MENU ------------
+1. Create
+2. Insert
+3. Modify
+4. Delete
+5. Display
+6. Exit
+ 
+Enter your choice : 4
+
+Enter name of the book : ABCD
+Book found
+Enter gmail for deleting contac : ayan@gmail.com
+
+Contac is deleted
+
+----------- MENU ------------
+1. Create
+2. Insert
+3. Modify
+4. Delete
+5. Display
+6. Exit
+ 
+Enter your choice : 5
+
+Enter name of the book : ANCD
+Book Not found
+
+----------- MENU ------------
+1. Create
+2. Insert
+3. Modify
+4. Delete
+5. Display
+6. Exit
+ 
+Enter your choice : 5
+
+Enter name of the book : ABCD
+Book found
+Content in file : 
+
+
+[Name = 'aditya' | Gmail = 'aditya@gmail.com' | Address = 'pimpri']
+
+----------- MENU ------------
+1. Create
+2. Insert
+3. Modify
+4. Delete
+5. Display
+6. Exit
+ 
+Enter your choice :   
+
+
+COMMENTS
