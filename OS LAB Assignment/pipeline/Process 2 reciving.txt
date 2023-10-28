@@ -1,55 +1,75 @@
-#include <stdio.h>
-#include <string.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
+#include<stdio.h>
+#include<string.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+#include<fcntl.h>
 
-int main() {
-    int fd_write, fd_read;
+int main(){
 
-    // FIFO file paths
-    char *fifo_send = "/tmp/fifo_send";
-    char *fifo_receive = "/tmp/fifo_receive";
+	int fd;
+	
+	char * myfifo = "/tmp/myfifo";
+	
+	char arr1[100], arr2[100];
+	
+	mkfifo(myfifo, 0666);
+	
+	while(1){
+		
+		//reading part
+		
+		fd = open(myfifo, O_RDONLY);
+		
+		read(fd, arr1, sizeof(arr1));
+		
+		printf("\nUser1 : %s",arr1);
+		int i = 0, word = 0, character = 0, line = 0;
 
-    // Creating the named pipes (FIFO)
-    mkfifo(fifo_send, 0666);
-    mkfifo(fifo_receive, 0666);
-
-    while (1) {
-        // Open FIFO for reading
-        fd_read = open(fifo_send, O_RDONLY);
-
-        // Read the sentence sent by the first process
-        char sentence[100];
-        read(fd_read, sentence, sizeof(sentence));
-        close(fd_read);
-
-        if (strcmp(sentence, "exit\n") == 0) {
-            break;
-        }
-
-        // Process the sentence (count characters, words, and lines)
-        int charCount = 0, wordCount = 0, lineCount = 0;
-        for (int i = 0; sentence[i] != '\0'; i++) {
-            charCount++;
-            if (sentence[i] == ' ' || sentence[i] == '\n') {
-                wordCount++;
+        while (arr1[i] != '\0') {
+            if (arr1[i] == ' ') {
+                word++;
+            } else if (arr1[i] == '\n') {
+                line++;
+            } else {
+                character++;
             }
-            if (sentence[i] == '\n') {
-                lineCount++;
-            }
+            i++;
         }
+        
+        printf("Number of words   : %d\n", word);
+        printf("Number of lines   : %d\n", line);
+        printf("Number of characters: %d\n", character);
+		
+		close(fd);
+		
+		//writing part
+		
+		fd = open(myfifo, 0666);
+		printf("\nYou(User2) : ");
+		fgets(arr2, 100, stdin);	
+		write(fd, arr2, strlen(arr2)+1);
+		int word1 = 0, character1 = 0, line1 = 0;
+        while(arr2[i] != '\0'){
+        	if(arr2[i] == ' '){
+        		word1 ++;
+        	}
+        	else if(arr2[i] == '\n'){
+        		line1 ++;
+        	}
+        	else{
+        		character1 ++;
+        	}
+        	i++;
+        }
+        printf("Number of words   : %d\n", word);
+        printf("Number of lines   : %d\n", line);
+        printf("Number of characters: %d\n", character);
+        close(fd);
+		close(fd);
+	
+	}
 
-        // Open FIFO for writing
-        fd_write = open(fifo_receive, O_WRONLY);
+	return 0;
 
-        // Write the result to the receive FIFO
-        char result[100];
-        sprintf(result, "Characters: %d, Words: %d, Lines: %d", charCount, wordCount, lineCount);
-        write(fd_write, result, strlen(result) + 1);
-        close(fd_write);
-    }
-
-    return 0;
 }
+
