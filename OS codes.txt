@@ -1,3 +1,27 @@
+
+#include<stdio.h>
+#include<sys/types.h>
+#include<unistd.h>
+
+int main(){
+
+    int q;
+    q=fork();
+    if(q<0){
+        printf("Error: ");
+    }
+    else if(q==0){
+        printf("CHILD : This is Chid process with ID = ",getpid());
+        printf("CHILD : Child of Parent process ID = ",getppid());
+    }
+    else{
+        printf("PARENT : This is Parent process with ID = ",getpid());
+        printf("PARENT : My child process ID = ",q);
+    }
+    return 0;
+
+}
+
 #############################################################################################################################################################
 ########################################################################## 2. AddressBook ######################################################################
 #############################################################################################################################################################
